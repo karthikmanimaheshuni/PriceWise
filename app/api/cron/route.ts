@@ -22,7 +22,15 @@ export async function GET(request: Request) {
     const updatedProducts = await Promise.all(
       products.map(async (currentProduct) => {
         // Scrape product
-        const scrapedProduct = await scrapeAmazonProduct(currentProduct.url);
+        let scrapedProduct;
+
+        try {
+          scrapedProduct = await scrapeAmazonProduct(currentProduct.url);
+        } catch (err) {
+          console.error("Scraping failed for:", currentProduct.url);
+          return currentProduct; // graceful fallback
+        }
+
 
         if (!scrapedProduct) return;
 
