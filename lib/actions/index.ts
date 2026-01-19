@@ -43,8 +43,8 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     revalidatePath(`/products/${newProduct._id}`);//we need to revalidate in next js if not the update will be stuck in the cache 
     ///return newProduct;
   } catch (error: any) {
-    console.error("❌ scrapeAndStoreProduct ERROR:", error);
-    throw error;
+    console.error("❌ scrapeAndStoreProduct ERROR:", error.message);
+    return; // ❗ do NOT crash server component
   }
 }
 

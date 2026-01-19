@@ -23,7 +23,32 @@ export async function scrapeAmazonProduct(url:string){
     }
     try {
         //fetch the product page 
-        const response = await axios.get(url,options);
+        const response = await axios.get(url, {
+            ...options,
+            timeout: 15000,
+            headers: {
+                "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+                "Accept-Language": "en-IN,en;q=0.9",
+                "Accept":
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            },
+            validateStatus: () => true,
+            });
+
+            if (response.status !== 200) {
+            console.warn("Amazon blocked request:", response.status);
+            return null;
+            }
+
+            if (
+            typeof response.data === "string" &&
+            response.data.toLowerCase().includes("captcha")
+            ) {
+            console.warn("Amazon CAPTCHA detected");
+            return null;
+            }
+
         ///console.log(response.data);
 
         const $ = cheerio.load(response.data)
@@ -95,7 +120,8 @@ export async function scrapeAmazonProduct(url:string){
         
         
     } catch (error:any) {
-        throw new Error(`Failed to scrape product :${error.message}`)
+        console.error("SCRAPER ERROR:", error.message);
+        return null; // ❗ DO NOT throw in production
         
     }
 }
