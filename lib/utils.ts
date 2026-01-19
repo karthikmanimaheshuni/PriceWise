@@ -10,25 +10,27 @@ const Notification = {
 const THRESHOLD_PERCENTAGE = 40;
 
 // Extracts and returns the price from a list of possible elements.
-export function extractPrice(...elements: any) {
+export function extractPrice(...elements: any[]) {
   for (const element of elements) {
-    const priceText = element.text().trim();
+    if (!element || element.length === 0) continue;
 
-    if(priceText) {
-      const cleanPrice = priceText.replace(/[^\d.]/g, '');
+    const text =
+      element.first().text()?.trim() ||
+      element.attr?.("content") ||
+      "";
 
-      let firstPrice; 
+    if (!text) continue;
 
-      if (cleanPrice) {
-        firstPrice = cleanPrice.match(/\d+\.\d{2}/)?.[0];
-      } 
+    // Remove currency, commas, spaces
+    const cleaned = text.replace(/[₹,]/g, "").replace(/[^\d.]/g, "");
 
-      return firstPrice || cleanPrice;
-    }
+    const price = parseFloat(cleaned);
+    if (!isNaN(price)) return price;
   }
 
-  return '';
+  return null;
 }
+
 
 // Extracts and returns the currency symbol from an element.
 export function extractCurrency(element: any) {
